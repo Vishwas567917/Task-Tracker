@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Responsive Task Tracker</title>
+    <!-- Responsive design with CSS -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+
+        .task-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .task-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+
+        .task-input button {
+            padding: 10px;
+            border: none;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .task-input button:hover {
+            background: #218838;
+        }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .task-list li.completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+
+        .task-list button {
+            background: none;
+            border: none;
+            color: red;
+            cursor: pointer;
+        }
+
+        .task-list button:hover {
+            color: darkred;
+        }
+
+        /* Responsive design adjustments */
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            .task-input input {
+                font-size: 0.9em;
+            }
+            .task-input button {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task Tracker</h1>
+
+        <div class="task-input">
+            <input type="text" id="task-text" placeholder="Add a new task...">
+            <button id="add-task-btn">Add Task</button>
+        </div>
+
+        <ul id="task-list" class="task-list">
+            <!-- Tasks will be added here dynamically -->
+        </ul>
+    </div>
+
+    <!-- JavaScript for interactivity -->
+    <script>
+        const taskInput = document.getElementById('task-text');
+        const addTaskBtn = document.getElementById('add-task-btn');
+        const taskList = document.getElementById('task-list');
+
+        // Load tasks from local storage when the page loads
+        window.addEventListener('load', function() {
+            const savedTasks = localStorage.getItem('tasks');
+            if (savedTasks) {
+                const tasks = JSON.parse(savedTasks);
+                tasks.forEach((task) => {
+                    addTaskToDOM(task.text, task.completed);
+                });
+            }
+        });
+
+        // Function to add a task to the DOM
+        function addTaskToDOM(text, completed = false) {
+            const taskItem = document.createElement('li');
+
+            const taskTextNode = document.createTextNode(text);
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', function() {
+                taskList.removeChild(taskItem);
+                saveTasks(); // Save after deletion
+            });
+
+            taskItem.addEventListener('click', function() {
+                taskItem.classList.toggle('completed');
+                saveTasks(); // Save after toggle
+            });
+
+            if (completed) {
+                taskItem.classList.add('completed');
+            }
+
+            taskItem.appendChild(taskTextNode);
+            taskItem.appendChild(deleteBtn);
+            taskList.appendChild(taskItem);
+        }
+
+        // Function to add a task when the button is clicked
+        function addTask() {
+            const text = taskInput.value.trim();
+            if (text === '') {
+                alert('Please enter a valid task.');
+                return;
+            }
+
+            addTaskToDOM(text);
+            taskInput.value = ''; // Clear the input
+            saveTasks(); // Save after adding a new task
+        }
+
+        addTaskBtn.addEventListener('click', addTask);
+
+        // Add task when the Enter key is pressed
+        taskInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                addTask();
+            }
+        });
+
+        // Save tasks to local storage
+        function saveTasks() {
+            const tasks = [];
+            const taskItems = taskList.querySelectorAll('li');
+            taskItems.forEach((taskItem) => {
+                tasks.push({
+                    text: taskItem.firstChild.textContent,
+                    completed: taskItem.classList.contains('completed'),
+                });
+            });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+    </script>
+</body>
+</html>
